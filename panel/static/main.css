@@ -1,0 +1,120 @@
+html {
+    margin: 0;
+    padding: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url(./bg.png);
+    font-family: "Source Code Pro", monospace;
+    scrollbar-width: none;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    font-weight: 200;
+}
+.settings {
+ width: 1000px;
+ height: 75vh;
+ display: flex;
+ margin: auto;
+ align-items: center;
+ flex-direction: column;
+}
+
+
+form {
+    display: flex;
+    width: 475px;
+    height: 475px;
+    margin-top: 32px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    border: dotted;
+    border-radius: 30px;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+ 
+
+input, textarea {
+    width: 300px;
+    height: 50px;
+}
+
+select {
+    width: 125px;
+    height: 25px;
+}
+select::-webkit-scrollbar { /*For WebKit Browsers*/ /* Брал со stackoverflow чтобы убрать вертикальный скролл бар в селект */
+    width: 0;
+}
+
+input, select {
+    text-align: center;
+}
+
+
+select, input, textarea {
+    margin-top: 12px;
+    background: none;
+    border: solid;
+    border-color: gray;
+    border-radius: 10px;
+    color: grey;
+}
+
+
+textarea {
+    height: 150px;
+    resize: none;
+}
+
+textarea::placeholder {
+    text-align: center;
+}
+
+label, p {
+    font-size: 16px;
+    margin-top: 0px;
+    color: gray;
+}
+
+
+button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: grey;
+    padding-top: 12px;
+    padding-bottom: 8px;
+}
+
+button:hover {
+    transform: scale(1.2);
+}
+
+.save:hover {
+    color: green;
+}
+.delete:hover {
+    color: red;
+}
+
+.config_pos {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+label {
+    margin-right: 16px;
+}
+
+input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    transform: translateY(-25%);
+}
+

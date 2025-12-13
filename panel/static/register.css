@@ -1,0 +1,68 @@
+html {
+    padding: 0;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-image: url(./bg.png);
+    font-family: "Source Code Pro", monospace;
+}
+
+h1, h2 {
+    text-align: center;
+    font-weight: 200;
+    color: white;
+}
+
+h2 {
+    padding-top: 32px;
+}
+
+p {
+  font-size: 16px;
+  text-align: center;
+  font-weight: 300;
+  color: white;
+  padding-top: 8px;
+}
+
+form {
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 500px;
+    height: 500px;
+    border-width: 3px;
+}
+
+input {
+    width: 200px;
+    height: 50px;
+    text-align: center;
+    border-width: 3px;
+    border-radius: 15px;
+    border-color: black;
+    border-style: dotted;
+    margin-top: 8px;
+    background-color: rgba(0, 0, 0, 0.1)
+}
+
+input[type="date"] {
+    color: gray;
+}
+
+button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: grey;
+    padding-top: 8px;
+}
+
+.footer {
+  bottom: 0;
+  position: fixed;
+  left: 50%;
+  transform: translate(-50%);
+}

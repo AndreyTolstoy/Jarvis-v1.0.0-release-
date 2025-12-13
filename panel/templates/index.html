@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+
+  <!--Шрифты-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Story+Script&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../static/main.css">
+</head>
+<body>
+  <h1>Привет, {{ data["name"] }}!</h1>
+  <div class="settings">
+    <form action="/plugin" method="post"> <!--Плагины-->
+      <p>Plugin</p>
+      <select name="plugin">
+        <option selected>Не выбрано</option>
+        {% for plugin in plugins %}
+             <option value={{ plugin }} {% if active_plugin_name == plugin %} selected {% endif %}>{{ plugin }}</option>
+        {% endfor %}
+      </select>
+  
+      <select name="plugin_do">
+        <option value="open" {% if active_plugin and plugins[active_plugin_name]["do"] == "open" %} selected {% endif %} >Открыть</option>
+        <option value="key"  {% if active_plugin and plugins[active_plugin_name]["do"] == "key" %} selected {% endif %}>Клавиши</option>
+        <option value="code" {% if active_plugin and plugins[active_plugin_name]["do"] == "code" %} selected {% endif %}>Код</option>
+      </select>
+      <input type="text" name="plugin_name" placeholder="Название плагина" {% if active_plugin_name %} value={{ active_plugin_name }} {% endif %}>
+      <textarea name="plugin_args" placeholder="Данные">{% if active_plugin %}{{ plugins[active_plugin_name]["data"] }}{% endif %}</textarea>
+      <button  name="action" value="plugin_save" class="save">Сохранить</button>
+      <button name="action" value="plugin_delete" class="delete">Удалить</button>
+    </form>
+  
+    <form action="/command" method="post"> <!--Команды-->
+      <p>Command</p>
+      <select name="command">
+            <option selected>Не выбрано</option>
+            {% for command in commands %}
+             <option value={{ command }} {% if active_command_name == command %} selected {% endif %}>{{ command }}</option>
+            {% endfor %}
+      </select>
+  
+      <input type="text" name="command_name" placeholder= "Название команды" {% if active_command %} value={{ active_command_name }} {% endif %}>
+      <input type="text" name="command_act" placeholder="Фразы (через ,)" {% if active_command %}  value={{ ",".join(active_command["act_phrase"]) }} {% endif %}>
+  
+      <select name="plugin_for_command" multiple>
+            {% for plugin in plugins %}
+             <option value={{ plugin }} {% if active_command and plugin in active_command["plugin"] %} selected {% endif %}>{{ plugin }}</option>
+            {% endfor %}
+      </select>
+      <input type="text" name='plugin_args' placeholder="Плагин-args (key : value)" {% if active_command and active_command["plugin_param"] != {}  %} {% for k, v in active_command["plugin_param"].items() %} value={{ k }}:{{ v }} {% endfor %} {% endif %}>
+      <select name="priority">
+              {% for i in range(1, 6) %}
+               <option value={{ i }} {% if active_command and i == active_command["priority"] %} selected {% endif %}>{{i}}</option>
+              {% endfor %}
+      </select>
+      <button name="action" value="command_save" class="save">Сохранить</button>
+      <button name="action" value="command_delete" class="delete">Удалить</button>
+    </form>
+
+    <form action="/config" method="post" class="config">
+      <div class="config_pos">
+       <input type="checkbox" name="ats" {% if data["ats"] %} checked {% endif %}>
+       <label for="ats">ATS</label>
+       <input type="checkbox" name="outside" {% if data["outside"] %} checked {% endif %}>
+       <label for="ats">Outside</label>
+       <input type="checkbox" name="logs" {% if data["logs"] %} checked {% endif %}>
+       <label for="ats">Logs</label>
+      </div>
+      <button name="action" value="command_save" class="save">Сохранить</button>
+    </form>
+  </div>
+</body>
+</html>

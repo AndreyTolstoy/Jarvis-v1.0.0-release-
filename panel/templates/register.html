@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About me</title>
+
+    <!--Шрифты-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Story+Script&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../static/register.css">
+</head>
+<body>
+    <h1>Привет! Я - Jarvis</h1>
+    <p>Jarivs - голосовой ассистент для твоего ПК. Обычному пользователю хватит и базовых сценариев, но для продвинутых есть ATS</p>
+    <p>ATS - псевдо - язык для написания плагинов под Jarvis</p>
+    <h2>Раскажи мне немного о себе:</h2>
+    <form action="/" method="post">
+        <input type="text" name="name" placeholder="Имя" required>
+        <input type="date" name="birthday" placeholder="День рождения" required>
+        <input type="password" name="token" placeholder="Пароль для активации" required>
+        {% if not password %} <!---При неправильном пароле, йоу-->
+         <style>
+             input[type="password"] {
+                border-color: red;
+             }
+         </style>
+        
+        {% endif %}
+
+        <button>Далее</button>
+    </form>
+    <div class="footer">
+        <p>Support: @Tolstoy_Andrey</p>
+    </div>
+</body>
+</html>
