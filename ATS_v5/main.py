@@ -6,13 +6,14 @@
 
 
 from ATS_v5.description import *
-from ATS_v5 import config #Здесь можно сделат отключаемые параметры, например, логи для просмотра этапов парсинга ATS. Полезно для оптимизации
+
+self_to_do_flag = False #Если код передаваемый в main является to_do кодом (был написан после then или в print был использован код библиотеки print:web.get:''). Нужен для отслеживания строки, если при выполнении возникнет ошибка. Ведь то, что идет в self.todo, считается отдельной строкой, а нужно вывести ошибку и номер строки "родителя"
 blocks_True_list = [] #Список успешно выполненных блоков (если if ... == True)
 cache = {}
-logs = {}
 line_count = 1
 plugin_params_global = {}
 version = "ATS v5.0 "
+config = None
 class ElementsSpliter:
     def __init__(self, structure_name=None, structure_body=None, structure_end=None, structure_data=None, structure_operation=None, params={}, param_handler=None, param_data=None, util=None, util_data=None, block_type=None, block_operation_type=None, to_do=None):
         """Главная структура"""
@@ -36,11 +37,14 @@ class ElementsSpliter:
         self.block_type = block_type
         self.block_operation_type = block_operation_type
 
-    def main(self, code):
-        self.clear_params()
+    def main(self, code, plugins_args, config_):
+        global config, plugin_params_global, line_count, self_to_do_flag
+        config = config_
+        plugin_params_global = plugins_args
         if code:
          code = code.strip()
          for line in code.split(";"):
+             self.clear_params()
              line = line.strip()
              if line !="":
                line_copy = line
@@ -48,6 +52,7 @@ class ElementsSpliter:
                if line.split(".")[0] in description["libs"]:
                   self.structure_name = line.split(".")[0]
                   if "then" in line:
+                     
                      self.to_do = line.split("then")[1].strip()
                      line = line.split("then")[0].strip()
  
@@ -76,21 +81,21 @@ class ElementsSpliter:
                   for name, params in blocks.items():
                    if name == line.split(" ")[0]:
                       self.block_type = name
- 
+                                            
                       if self.block_type == "else":
                         if blocks_True_list == []:
-                           errors_output(f"Error: u can`t use else without if")
+                           self.errors_output(f"Error: u can`t use else without if")
 
                         if blocks_True_list[-1][0] == "if" and blocks_True_list[-1][1] == True:
                           self.clear_params()
                           continue #полностью игнорим строку с else, так как если if есть в списке и он успешно выполнен, то нет смысла тратить время исполнения на парсинг ненужного кода
-                        
- 
+
                       self.to_do = line.split("{")[1].replace("}", "").replace("*", ";").strip().replace("\n", "")
                       line = line.split(" ")[1]
- 
+
+               
                       if params["operation_needed"] == True: 
-                         self.structure_end = line.split("?" if "?" in line else "!")[0]    #!(line[1][:1] if line[1][:1] != "'" else "'" + line[1].split("'")[1] + "'")
+                         self.structure_end = line.split("?" if "?" in line else "!")[0]    
                          self.structure_data = line.split("?" if "?" in line else "!")[1]  
                          self.block_operation_type = line.split(self.structure_end)[1].split(self.structure_data)[0]
 
@@ -106,6 +111,7 @@ class ElementsSpliter:
                   line = line.split(":")
                   self.util = line[0]
                   self.util_data = line_copy[len(self.util)+1:]     
+                  line = line_copy
                
                #?"""==Params=="""
                elif "=" in line:
@@ -115,8 +121,7 @@ class ElementsSpliter:
                   self.param_data = Parser.get_from_cache_or_params(self, self.param_data)
                   self.params[self.param_handler] = self.param_data
  
-               self.full_logs_dump(line)  
-               self.logs_load() 
+               self.full_logs_dump(line)
  
                Parser(
                   self.structure_name,
@@ -133,10 +138,7 @@ class ElementsSpliter:
                   self.block_operation_type,
                   self.to_do
                ).parser()
-               self.clear_params()
- 
-         self.logs_load() 
-
+               self_to_do_flag = False
     
 
     def clear_params(self):
@@ -151,41 +153,38 @@ class ElementsSpliter:
         self.util_data = None
         self.block_type = None
         self.block_operation_type = None
+        self.to_do = None
 
     def full_logs_dump(self, line): 
-       global logs
-       logs[line_count] = {
-          "Code:" : line,
-          "Structure_name:" : self.structure_name,
-          "Structure_body:" :  self.structure_body,
-          "Structure_end:" : self.structure_end,
-          "Structure_data:" : self.structure_data,
-          "Structure_operation:" : self.structure_operation,
-          "Params:" : self.params,
-          "Param_handler:" : self.param_handler,
-          "Param_data:" : self.param_data, 
-          "Util:" : self.util,
-          "Util_data:" : self.util_data,
-          "Block_type:" : self.block_type,
-          "Block_operation_type:" : self.block_operation_type,
-          "To_do:" : self.to_do,
-          "Cache:" : cache,
-       }
+        log_line = (
+           f"Code:{line}\n"
+           f"Structure_name:{self.structure_name}\n"
+           f"Structure_body:{self.structure_body}\n"
+           f"Structure_end:{self.structure_end}\n"
+           f"Structure_data:{self.structure_data}\n"
+           f"Structure_operation:{self.structure_operation}\n"
+           f"Params:{self.params}\n"
+           f"Param_handler:{self.param_handler}\n"
+           f"Param_data:{self.param_data}\n"
+           f"Util:{self.util}\n"
+           f"Util_data:{self.util_data}\n"
+           f"Block_type:{self.block_type}\n"
+           f"Block_operation_type:{self.block_operation_type}\n"
+           f"To_do:{self.to_do}\n"
+           f"Cache:{cache}\n"
+        )
+        self.logs_load(log_line)
       
        
-    def logs_load(self):
-       if config.logs():
-          for line, data in logs.items():
-             print(f"Line {line}:\n")
-             for names, values in data.items():
-                print("---", names, values)
+    def logs_load(self, log_line):
+         if config["logs"]:
+             print(f"Line {line_count}:\n")
+             print("---", log_line)
              
              print("\n=======")
-      
-
    
-def errors_output(error):
-      print(version, error, "Line:", line_count)
+    def errors_output(self, error):
+      print(version, error, "Line:", line_count - 1 if self_to_do_flag == True else line_count)
       exit()
       
 
@@ -207,6 +206,10 @@ class Parser(ElementsSpliter):
           self.blocks_block()
 
        line_count +=1
+       if self.to_do:
+          self.to_do_func()
+
+
 
    def libs_block(self): #Обработчик библиотек
          path = None
@@ -239,30 +242,35 @@ class Parser(ElementsSpliter):
                   do = do(int(self.structure_data))
  
                cache[self.structure_name + "." + (self.structure_body + self.structure_end if self.structure_body else self.structure_end)] = do
-               if self.to_do:
-                  self.to_do_func()
             
             except Exception as e:
-               errors_output(e)
+               self.errors_output(e)
 
    
    def utils_block(self): #Обработчик print и т.п
       if self.util:
-            if self.util_data.split(".")[0] in description["libs"] and self.util_data not in cache: #print:web.get'https://youtube.com'; будет работать, так как он передаст 100% рабочую конструкцию, она обработается и выведится
-               util_data_structure = self.util_data.split("'")[0]
-               if "+" in self.util_data:
-                  util_data_structure  += "+" +  self.util_data.split("+")[1] #для do=...+...
+            if self.util == "print":
+             self.util_data = self.get_from_cache_or_params(self.util_data)  
+             if type(self.util_data) == str and self.util_data.split(".")[0] in description["libs"] and self.util_data not in cache: #print:web.get'https://youtube.com'; будет работать, так как он передаст 100% рабочую конструкцию, она обработается и выведится
+                   get_data = self.util_data.split("'")[0] if "'" in self.util_data else self.util_data.split(":")[0]
+                   self.to_do = f"{self.util_data} then do={get_data}; print:do"
 
-               self.to_do = f"{self.util_data} then do={util_data_structure};\nprint:do;"
-               ElementsSpliter.main(self, self.to_do)
-               return
+                   if "+" in self.util_data:
+                      get_data += "+" + self.util_data.split("+")[1]
 
-            self.util_data = self.get_from_cache_or_params(self.util_data)  
-            description["utils"][self.util]("ATS output:", self.util_data)
+                   self.to_do = f"{self.util_data} then do={get_data}; print:do"
+                   return
+      
+             description["utils"][self.util]("ATS output:", self.util_data)
+
+            
+            elif self.util == "plugin":
+               self.util_data = self.get_from_cache_or_params(self.util_data).replace("'", "")
+               description["utils"][self.util]([self.util_data], plugin_params_global, config)
             
 
    def blocks_block(self): #Обработчик if & for
-         global blocks_True_list
+         global blocks_True_list, line_count
          if self.block_type == "if":
             self.structure_end = self.get_from_cache_or_params(self.structure_end)
             self.structure_data = self.get_from_cache_or_params(self.structure_data)
@@ -271,7 +279,6 @@ class Parser(ElementsSpliter):
             self.structure_data = int(self.structure_data.replace("'", "")) if type(self.structure_data) == str and type(self.structure_end) == int else self.structure_data
 
             if (self.structure_end == self.structure_data) and self.block_operation_type == "?" or (self.structure_end != self.structure_data) and self.block_operation_type == "!":
-               self.to_do_func()
                blocks_True_list.append(["if", True])
                return
 
@@ -280,17 +287,18 @@ class Parser(ElementsSpliter):
          elif self.block_type == "for":
             self.structure_end = self.get_from_cache_or_params(self.structure_end)
             for _ in range(int(self.structure_data.replace("'", ""))): #у нас есть заготовка. В будущем можно сделать список и писать вместо structure_data = range, имя списка. Но вряд-ли, т.к нет смысла дальше обновлять ATS
-              self.to_do_func()
+              self.to_do_func() #Единственный случай когда self.to_do_func вызывается напрямую, так как нам нужно вызывать определенное кол-во раз.
+              line_count+=1
             
 
          elif self.block_type == "else":
-              self.to_do_func()
+              return
 
 
    def to_do_func(self):
-      global line_count
-      line_count +=1
-      ElementsSpliter.main(self, self.to_do)
+      global self_to_do_flag
+      self_to_do_flag = True 
+      ElementsSpliter.main(self, self.to_do, plugin_params_global, config)
 
    def get_from_cache_or_params(self, name): #Функция для поиска значения переменной
       name_copy = name
@@ -308,18 +316,15 @@ class Parser(ElementsSpliter):
             name = plugin_params_global[name]
          
          else:
-           errors_output(f"Unknow param: {name}")
+           self.errors_output(f"Unknow param: {name}")
 
          if "+" in name_copy:
-            name = getattr(name, name_copy.split("+")[1])
+            try:
+             name = getattr(name, name_copy.split("+")[1])
+            
+            except Exception as e:
+               self.errors_output(e)
             
       return name 
    
 
-
-def bridge(code, plugin_params):
- global plugin_params_global
- plugin_params_global = plugin_params
-
- run = ElementsSpliter()
- status = run.main(code)

@@ -7,7 +7,7 @@ def load(file):
      return json.load(f)
    
   except:
-    return {} if file != "commands.json" else {"commands" : {}}
+    return {"commands" : {}, "plugins" : {}, "cache": {}}
   
 
 def dump(file, data):

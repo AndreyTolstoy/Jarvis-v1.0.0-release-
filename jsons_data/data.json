@@ -1,0 +1,62 @@
+{
+    "commands": {
+        "панель": {
+            "name": "панель",
+            "act_phrase": [
+                "открой панель управления",
+                "панель управления"
+            ],
+            "plugin": [
+                "панель"
+            ],
+            "plugin_param": {},
+            "priority": 5
+        },
+        "yt": {
+            "name": "yt",
+            "act_phrase": [
+                "youtube",
+                "ютуб"
+            ],
+            "plugin": [
+                "YT"
+            ],
+            "plugin_param": {},
+            "priority": 4
+        },
+        "тест": {
+            "name": "тест",
+            "act_phrase": [
+                "test"
+            ],
+            "plugin": [
+                "if"
+            ],
+            "plugin_param": {},
+            "priority": 4
+        }
+    },
+    "plugins": {
+        "панель": {
+            "data": "webb.open'http://127.0.0.1:256'",
+            "do": "open"
+        },
+        "YT": {
+            "data": "webb.open'https://youtube.com'",
+            "do": "open"
+        },
+        "if": {
+            "data": "print:web.get'https://youtube.com'+status_code",
+            "do": "code"
+        }
+    },
+    "cache": {
+        "hp_status": false,
+        "name": "AT",
+        "birthday": "2010-11-25",
+        "token": "$2b$14$9gWubX14ZGkupSlzfU34YeWlDy/lSLdsNE77Y3vQGjLitLbOGJWC2",
+        "ats": true,
+        "outside": true,
+        "logs": false
+    }
+}
